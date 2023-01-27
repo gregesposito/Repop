@@ -48,8 +48,9 @@ windower.register_event('incoming chunk',function(id,org,mod,inj,blk)
 		end
 	elseif id == 0x00A then --zoned
 		zoning = true
+	-- elseif id == 0x065 then
+		-- zoning = true
 	end
-    
 end)
 
 windower.register_event('zone change', function(new_id, old_id)
@@ -84,7 +85,8 @@ function npc_check_injection(positionA)
 		local distance = (positionA - positionB):length()
 		if distance <= 45 then
 			local mob = windower.ffxi.get_mob_by_index(npc.fields.Index)
-			if not mob or not mob.valid_target or mob.model == 0 then
+			if mob.id == 0 and mob.index == 0 and mob.is_npc == false and not mob.model then
+			--if not mob or not mob.valid_target or mob.model == 0 then
 				windower.add_to_chat(123,'WARNING: Packet injection for NPC %d "%s" to be visible to the client.':format(npc.fields.Index, npc.name))
 				local packet_raw_data = mime.unb64(npc.packet)
 				windower.packets.inject_incoming(0x00E, packet_raw_data)
