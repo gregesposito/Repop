@@ -16,7 +16,7 @@ local mime = require("mime")
 
 local storage = T{}
 npc_fields_we_care_about = S{'NPC', 'Index', 'Rotation', 'X', 'Y', 'Z', 'Model'}
-mob_name_whitelist = S{'Dimensional Portal','Transcendental Radiance','Incantrix'}
+mob_name_whitelist = S{'Dimensional Portal','Transcendental Radiance','Incantrix','Home Point #2'}
 
 local info = windower.ffxi.get_info()
 
@@ -42,7 +42,10 @@ end
 windower.register_event('incoming chunk',function(id,org,mod,inj,blk)
     if id == 0x00E then
         local packet = packets.parse('incoming',org)
-		if (zone_mob_names and zone_mob_names[packet.Index]) and bit.band(packet['Mask'], 1) > 0 and packet.Model > 0 then
+		local mask_position_update = bit.band(packet['Mask'], 1) > 0
+		local hidden_model = bit.band(packet['_unknown2'],2) > 0
+		local untargetable = bit.band(packet['_unknown2'],0x80000) > 0
+		if zone_mob_names and zone_mob_names[packet.Index] and mask_position_update and packet.Model > 0 and not hidden_model and not untargetable then
 			windower.send_ipc_message('C':pack(zone_id)..mime.b64(mod))
 			update_storage(packet, mod)
 		end
