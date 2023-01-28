@@ -52,7 +52,7 @@ windower.register_event('incoming chunk',function(id,org,mod,inj,blk)
 	elseif id == 0x00A then --zoned
 		zoning = true
 	elseif id == 0x065 then
-		zoning = os.time() + 5
+		zoning = os.time() + 10
 	end
 end)
 
@@ -62,7 +62,7 @@ end)
 
 windower.register_event('outgoing chunk',function(id,org,mod,inj,blk)
 	if id == 0x00C then
-		zoning = os.time() + 10
+		zoning = os.time() + 12
 		zone_mob_names = T(windower.ffxi.get_mob_list()):filter(set.contains+{mob_name_whitelist})
 	elseif id == 0x015 and (not zoning or type(zoning)=='number' and os.time() >= zoning) then
 		zoning = false
@@ -85,7 +85,6 @@ function npc_check_injection(positionA)
 		if distance <= 45 then
 			local mob = windower.ffxi.get_mob_by_index(npc.fields.Index)
 			if mob.id == 0 and mob.index == 0 and mob.is_npc == false and not mob.model then
-			--if not mob or not mob.valid_target or mob.model == 0 then
 				windower.add_to_chat(123,'WARNING: Packet injection for NPC %d "%s" to be visible to the client.':format(npc.fields.Index, npc.name))
 				windower.send_command('chatter postmessage NPC Injection: '..windower.ffxi.get_player().name..' -NPC: %d "%s" to be visible to the client.':format(npc.fields.Index, npc.name))
 				local packet_raw_data = mime.unb64(npc.packet)
