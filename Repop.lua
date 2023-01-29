@@ -16,9 +16,14 @@ local mime = require("mime")
 
 local storage = T{}
 npc_fields_we_care_about = S{'NPC', 'Index', 'Rotation', 'X', 'Y', 'Z', 'Model'}
-mob_name_whitelist = S{'Dimensional Portal','Transcendental Radiance','Incantrix','Home Point #2'}
+mob_name_whitelist = S{'Dimensional Portal','Transcendental Radiance','Incantrix','Survival Guide','Home Point #2'}
 
+local in_battlefield = false
+
+local player = windower.ffxi.get_player()
 local info = windower.ffxi.get_info()
+
+TimestampFormat = '%H:%M:%S'
 
 if info.logged_in then
     zone_id = info.zone
@@ -40,6 +45,9 @@ function repop_cmd(...)
 end
 	
 windower.register_event('incoming chunk',function(id,org,mod,inj,blk)
+	if in_battlefield then
+		return
+	end
     if id == 0x00E then
         local packet = packets.parse('incoming',org)
 		local mask_position_update = bit.band(packet['Mask'], 1) > 0
@@ -61,6 +69,9 @@ windower.register_event('zone change', function(new_id, old_id)
 end)
 
 windower.register_event('outgoing chunk',function(id,org,mod,inj,blk)
+	if in_battlefield then
+		return
+	end
 	if id == 0x00C then
 		zoning = os.time() + 12
 		zone_mob_names = T(windower.ffxi.get_mob_list()):filter(set.contains+{mob_name_whitelist})
@@ -86,7 +97,6 @@ function npc_check_injection(positionA)
 			local mob = windower.ffxi.get_mob_by_index(npc.fields.Index)
 			if mob.id == 0 and mob.index == 0 and mob.is_npc == false and not mob.model then
 				windower.add_to_chat(123,'WARNING: Packet injection for NPC %d "%s" to be visible to the client.':format(npc.fields.Index, npc.name))
-				windower.send_command('chatter postmessage NPC Injection: '..windower.ffxi.get_player().name..' -NPC: %d "%s" to be visible to the client.':format(npc.fields.Index, npc.name))
 				local packet_raw_data = mime.unb64(npc.packet)
 				windower.packets.inject_incoming(0x00E, packet_raw_data)
 			end
@@ -101,6 +111,19 @@ windower.register_event('ipc message', function(msg, ...)
     local packet = packets.parse('incoming', modified)
     update_storage(packet, modified, zone)
 end)
+
+windower.register_event("gain buff", function(buff_id)
+	if buff_id == 254 then
+		in_battlefield = true
+    end
+end)
+
+windower.register_event("lose buff", function(buff_id)
+	if buff_id == 254 then
+		in_battlefield = false
+    end
+end)
+
 
 function update_storage(packet, modified, zone)
     --check for zone data:
@@ -152,3 +175,13 @@ function showmoblist()
 end
 
 windower.register_event('addon command', repop_cmd)
+
+
+
+				--windower.send_command('chatter postmessage NPC Injection: '..windower.ffxi.get_player().name..' -NPC: %d "%s" to be visible to the client.':format(npc.fields.Index, npc.name))
+				-- local date = os.date('*t')
+				-- local file = files.new('../../extlogs/Inject_%.4u.%.2u.%.2u.log':format(date.year, date.month, date.day))
+				-- if not file:exists() then
+					-- file:create()
+				-- end
+				-- file:append('%s [%s] - NPC %d "%s" - Zone: %s\n':format(os.date(TimestampFormat, os.time()) or '',player,npc.fields.Index,npc.name,res.zones[windower.ffxi.get_info().zone].name))
