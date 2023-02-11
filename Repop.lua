@@ -175,13 +175,3 @@ function showmoblist()
 end
 
 windower.register_event('addon command', repop_cmd)
-
-
-
-				--windower.send_command('chatter postmessage NPC Injection: '..windower.ffxi.get_player().name..' -NPC: %d "%s" to be visible to the client.':format(npc.fields.Index, npc.name))
-				-- local date = os.date('*t')
-				-- local file = files.new('../../extlogs/Inject_%.4u.%.2u.%.2u.log':format(date.year, date.month, date.day))
-				-- if not file:exists() then
-					-- file:create()
-				-- end
-				-- file:append('%s [%s] - NPC %d "%s" - Zone: %s\n':format(os.date(TimestampFormat, os.time()) or '',player,npc.fields.Index,npc.name,res.zones[windower.ffxi.get_info().zone].name))
