@@ -95,7 +95,7 @@ function npc_check_injection(positionA)
 		local distance = (positionA - positionB):length()
 		if distance <= 45 then
 			local mob = windower.ffxi.get_mob_by_index(npc.fields.Index)
-			if mob.id == 0 and mob.index == 0 and mob.is_npc == false and not mob.model then
+			if mob and mob.id == 0 and mob.index == 0 and mob.is_npc == false and not mob.model then
 				windower.add_to_chat(123,'WARNING: Packet injection for NPC %d "%s" to be visible to the client.':format(npc.fields.Index, npc.name))
 				local packet_raw_data = mime.unb64(npc.packet)
 				windower.packets.inject_incoming(0x00E, packet_raw_data)
