@@ -16,7 +16,7 @@ local mime = require("mime")
 
 local storage = T{}
 npc_fields_we_care_about = S{'NPC', 'Index', 'Rotation', 'X', 'Y', 'Z', 'Model'}
-mob_name_whitelist = S{'Dimensional Portal','Transcendental Radiance','Incantrix','Survival Guide','Home Point #2','Infernal Transposer'}
+mob_name_whitelist = S{'Dimensional Portal','Transcendental Radiance','Incantrix','Survival Guide','Home Point #2','Infernal Transposer','???'}
 
 local in_battlefield = false
 
